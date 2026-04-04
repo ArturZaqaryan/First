@@ -8,10 +8,41 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly List<User> users =
+            [
+                new User()
+                {
+                    Id = 1,
+                    Name = "Test",
+                    Username = "Test",
+                    Email = "Test"
+                },
+                new User()
+                {
+                    Id = 2,
+                    Name = "Test 2",
+                    Username = "Test 2",
+                    Email = "Test 2"
+                },
+                new User()
+                {
+                    Id = 3,
+                    Name = "Test 3",
+                    Username = "Test 3",
+                    Email = "Test 3"
+                },
+            ];
+
         [HttpGet("{id}")]
-        public string Get(int id)
+        public ActionResult<User> Get(int id)
         {
-            return "value";
+            var result = users.FirstOrDefault(u => u.Id == id);
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return result;
         }
 
         [HttpPost]
@@ -25,31 +56,14 @@ namespace WebApplication1.Controllers
             }
 
             user.Id = Random.Shared.Next(1, 1000);
+            users.Add(user);
 
-            return CreatedAtAction(nameof(Get), new { id = user.Id}, new UserCreatedResponse()
-            {
-                Id = user.Id.ToString(),
-                CreatedAt = DateTime.UtcNow,
-                Meta = new Meta()
-                {
-                    PoweredBy = "ReqRes",
-                    DocsUrl = "https://app.reqres.in/documentation",
-                    UpgradeUrl = "https://app.reqres.in/upgrade",
-                    ExampleUrl = "https://app.reqres.in/examples/notes-app",
-                    Variant = "v1_a",
-                    Message = "Classic ReqRes still works. Projects add persistence, auth, and logs.",
-                    Cta = new Cta()
-                    {
-                        Label = "See example app",
-                        Url = "https://app.reqres.in/examples/notes-app"
-                    },
-                    Context = "legacy_success"
-                }
-            });
+            var result = new { id = user.Id };
+            return CreatedAtAction(nameof(Get), result, result);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] User user, [FromServices] UsersService usersService)
+        public ActionResult Put(int id, [FromBody] User user, [FromServices] UsersService usersService)
         {
             var errorResponse = usersService.CheckAutorization(this.Request.Headers);
 
@@ -58,25 +72,16 @@ namespace WebApplication1.Controllers
                 return Unauthorized(errorResponse);
             }
 
-            return Ok(new UserUpdatedResponse()
+            var findUser = users.FirstOrDefault(u => u.Id == id); 
+
+            if (findUser == null)
             {
-                UpdatedAt = DateTime.UtcNow,
-                Meta = new Meta()
-                {
-                    PoweredBy = "ReqRes",
-                    DocsUrl = "https://app.reqres.in/documentation",
-                    UpgradeUrl = "https://app.reqres.in/upgrade",
-                    ExampleUrl = "https://app.reqres.in/examples/notes-app",
-                    Variant = "v1_a",
-                    Message = "Classic ReqRes still works. Projects add persistence, auth, and logs.",
-                    Cta = new Cta()
-                    {
-                        Label = "See example app",
-                        Url = "https://app.reqres.in/examples/notes-app"
-                    },
-                    Context = "legacy_success"
-                }
-            });
+                var result = new { id = user.Id };
+                return CreatedAtAction(nameof(Get), result, result);
+            }
+
+            users.Add(user);
+            return NoContent();
         }
     }
 }

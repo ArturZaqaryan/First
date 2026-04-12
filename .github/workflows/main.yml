@@ -1,0 +1,285 @@
+# .github/workflows/homework.yml
+name: Homework Assistant
+
+on:
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  # ─────────────────────────────────────────────────────────
+  # Triggered when PR is opened — posts welcome message
+  # ─────────────────────────────────────────────────────────
+  greet:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post welcome message
+        run: |
+          curl -s -o /dev/null --fail-with-body \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            -d '{
+              "body": "## 👋 Hey @${{ github.event.pull_request.user.login }}!\n\nYour PR is open. Here is how to get your code reviewed:\n\n**Step 1 — Set homework number** (triggers review automatically):\n```\n/hw digit\n```\n\n**Step 2 — Summon goblin for review after the new commits** (optional):\n```\n/summon-goblin\n```\n\n> 🗡️ The goblin is waiting..."
+            }'
+
+  # ─────────────────────────────────────────────────────────
+  # Triggered when student comments on the PR
+  # ─────────────────────────────────────────────────────────
+  handle-comment:
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request != null
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Check commenter identity
+        id: auth
+        run: |
+          COMMENTER="${{ github.event.comment.user.login }}"
+          PR_AUTHOR="${{ github.event.issue.user.login }}"
+          INSTRUCTOR="Annnnaaaa"
+
+          if [ "$COMMENTER" = "$PR_AUTHOR" ] || [ "$COMMENTER" = "$INSTRUCTOR" ]; then
+            echo "authorized=true" >> $GITHUB_OUTPUT
+          else
+            echo "authorized=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Parse command
+        id: cmd
+        if: steps.auth.outputs.authorized == 'true'
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+
+          echo "hw_found=false" >> $GITHUB_OUTPUT
+          echo "summon_found=false" >> $GITHUB_OUTPUT
+          echo "hw_number=" >> $GITHUB_OUTPUT
+
+          echo "DEBUG comment body: $COMMENT"
+
+          HW=$(echo "$COMMENT" | grep -oiP '^/hw\s*\K\d+' || true)
+          echo "DEBUG hw match result: '$HW'"
+
+          if [ -n "$HW" ]; then
+            echo "hw_found=true" >> $GITHUB_OUTPUT
+            echo "hw_number=$HW" >> $GITHUB_OUTPUT
+            echo "DEBUG matched /hw command, hw_number=$HW"
+            exit 0
+          fi
+
+          SUMMON=$(echo "$COMMENT" | grep -oiP '^/summon[\s_-]*goblin' || true)
+          echo "DEBUG summon match result: '$SUMMON'"
+
+          if [ -n "$SUMMON" ]; then
+            echo "summon_found=true" >> $GITHUB_OUTPUT
+            echo "DEBUG matched /summon-goblin command"
+          else
+            echo "DEBUG no matching command found"
+          fi
+
+      # ── /hw branch ─────────────────────────────────────────
+      - name: Create label and apply to PR
+        id: applylabel
+        if: steps.cmd.outputs.hw_found == 'true'
+        run: |
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/labels \
+            -d '{"name": "${{ steps.cmd.outputs.hw_number }}", "color": "0075ca"}')
+
+          if [ "$HTTP_STATUS" = "201" ]; then
+            echo "✅ Label created"
+          elif [ "$HTTP_STATUS" = "422" ]; then
+            echo "✅ Label already exists"
+          else
+            echo "❌ Failed to create label, status: $HTTP_STATUS"
+            exit 1
+          fi
+
+          ADD_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels \
+            -d '{"labels": ["${{ steps.cmd.outputs.hw_number }}"]}')
+
+          echo "Add label response:"
+          cat response.json
+
+          if [ "$ADD_STATUS" != "200" ]; then
+            echo "❌ Failed to add label to PR, status: $ADD_STATUS"
+            exit 1
+          fi
+
+          echo "✅ Label applied"
+          echo "success=true" >> $GITHUB_OUTPUT
+
+      - name: Confirm label and notify review started
+        if: steps.applylabel.outputs.success == 'true'
+        run: |
+          curl -s -o /dev/null --fail-with-body \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+            -d '{"body": "🏷️ Got it! Labeled as **${{ steps.cmd.outputs.hw_number }}**.\n\n⏳ Starting review automatically — results will appear here shortly."}'
+
+      - name: Fetch and save PR data
+        if: steps.applylabel.outputs.success == 'true'
+        run: |
+          PR_META=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}")
+
+          COMMIT_SHA=$(echo "$PR_META" | jq -r '.head.sha')
+          echo "Commit SHA: $COMMIT_SHA"
+          echo "$COMMIT_SHA" > commit_sha.txt
+
+          curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}/files?per_page=100" \
+            > pr_files.json
+
+          echo "PR files count: $(cat pr_files.json | jq 'length')"
+
+      - name: Upload PR data artifact
+        if: steps.applylabel.outputs.success == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-data-${{ github.event.issue.number }}
+          path: |
+            pr_files.json
+            commit_sha.txt
+          retention-days: 1
+
+      - name: Dispatch review after labeling
+        if: steps.applylabel.outputs.success == 'true'
+        run: |
+          DISPATCH_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.REVIEWER_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/Annnnaaaa/RESTlessGoblin/dispatches \
+            -d '{
+              "event_type": "review-requested",
+              "client_payload": {
+                "repo": "${{ github.repository }}",
+                "pr_number": "${{ github.event.issue.number }}",
+                "hw_number": "${{ steps.cmd.outputs.hw_number }}"
+              }
+            }')
+
+          echo "Dispatch response:"
+          cat response.json
+
+          if [ "$DISPATCH_STATUS" != "204" ]; then
+            echo "❌ Dispatch failed, status: $DISPATCH_STATUS"
+            exit 1
+          fi
+
+          echo "✅ Review dispatched successfully"
+
+      # ── /summon-goblin branch ───────────────────────────────
+      - name: Get hw label from PR
+        id: getlabel
+        if: steps.cmd.outputs.summon_found == 'true'
+        run: |
+          LABELS=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels)
+
+          HW=$(echo "$LABELS" | jq -r '.[].name | select(test("^[0-9]+$"))' | grep -oP '\d+' || true)
+
+          if [ -z "$HW" ]; then
+            echo "found=false" >> $GITHUB_OUTPUT
+          else
+            echo "found=true" >> $GITHUB_OUTPUT
+            echo "hw_number=$HW" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Warn if no hw label set yet
+        if: steps.cmd.outputs.summon_found == 'true' && steps.getlabel.outputs.found == 'false'
+        run: |
+          curl -s -o /dev/null --fail-with-body \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+            -d '{"body": "⚠️ RESTless Goblin does not know which homework this is!\n\nSet it first:\n```\n/hw digit\n```\nThen try summoning again."}'
+
+      - name: Post goblin intro
+        if: steps.cmd.outputs.summon_found == 'true' && steps.getlabel.outputs.found == 'true'
+        run: |
+          curl -s -o /dev/null --fail-with-body \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+            -d '{
+              "body": "## 👺 *GRAAAGHH!*\n\n*A wild goblin emerges from the depths of your pull request...*\n\n> 🗡️ \"I have been summoned to judge your code ${{ github.event.issue.user.login }}!. Prepare yourself.\"\n\n> *The goblin cracks its knuckles and opens your diff with a terrifying grin...*\n\n⏳ Review is on its way!"
+            }'
+
+      - name: Fetch and save PR data on summon
+        if: steps.cmd.outputs.summon_found == 'true' && steps.getlabel.outputs.found == 'true'
+        run: |
+          PR_META=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}")
+
+          COMMIT_SHA=$(echo "$PR_META" | jq -r '.head.sha')
+          echo "Commit SHA: $COMMIT_SHA"
+          echo "$COMMIT_SHA" > commit_sha.txt
+
+          curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}/files?per_page=100" \
+            > pr_files.json
+
+          echo "PR files count: $(cat pr_files.json | jq 'length')"
+
+      - name: Upload PR data artifact on summon
+        if: steps.cmd.outputs.summon_found == 'true' && steps.getlabel.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-data-${{ github.event.issue.number }}
+          path: |
+            pr_files.json
+            commit_sha.txt
+          retention-days: 1
+
+      - name: Dispatch review on summon
+        if: steps.cmd.outputs.summon_found == 'true' && steps.getlabel.outputs.found == 'true'
+        run: |
+          DISPATCH_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.REVIEWER_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/Annnnaaaa/RESTlessGoblin/dispatches \
+            -d '{
+              "event_type": "review-requested",
+              "client_payload": {
+                "repo": "${{ github.repository }}",
+                "pr_number": "${{ github.event.issue.number }}",
+                "hw_number": "${{ steps.getlabel.outputs.hw_number }}"
+              }
+            }')
+
+          echo "Dispatch response:"
+          cat response.json
+
+          if [ "$DISPATCH_STATUS" != "204" ]; then
+            echo "❌ Dispatch failed, status: $DISPATCH_STATUS"
+            exit 1
+          fi
+
+          echo "✅ Review dispatched successfully"

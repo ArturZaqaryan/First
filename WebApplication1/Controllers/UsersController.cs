@@ -25,37 +25,16 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] User user, [FromServices] UsersService usersService)
+        public IActionResult Post([FromBody] User user)
         {
-            var errorResponse = usersService.CheckAutorization(this.Request.Headers);
-
-            if (errorResponse != null)
-            {
-                return Unauthorized(errorResponse);
-            }
-
             var result = new { id = this.usersService.Add(user)};
             return CreatedAtAction(nameof(Get), result, result);
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] User user, [FromServices] UsersService usersService)
+        public ActionResult Put(int id, [FromBody] User user)
         {
-            var errorResponse = usersService.CheckAutorization(this.Request.Headers);
-
-            if (errorResponse != null)
-            {
-                return Unauthorized(errorResponse);
-            }
-
-            int resultId = this.usersService.EditOrAdd(id, user);
-
-            if (resultId != -1)
-            {
-                var result = new { id = user.Id };
-                return CreatedAtAction(nameof(Get), result, result);
-            }
-
+            this.usersService.EditOrAdd(id, user);
             return NoContent();
         }
     }

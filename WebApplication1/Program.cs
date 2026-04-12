@@ -1,4 +1,5 @@
-﻿using WebApplication1.Services.Abstract;
+﻿using WebApplication1.Clients;
+using WebApplication1.Services.Abstract;
 using WebApplication1.Services.Simple;
 
 namespace WebApplication1;
@@ -9,10 +10,26 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddHttpClient<PostsClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/posts/");
+        });
+
+        builder.Services.AddHttpClient<ProductsClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://fakestoreapi.com/products/");
+        });
+
+        builder.Services.AddHttpClient<UsersClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://reqres.in/api/users/");
+            client.DefaultRequestHeaders.Add("x-api-key", "reqres_902cbf1ee1eb4a4db6ed8ef5f4abde48");
+        });
+
         // Add services to the container.
-        builder.Services.AddScoped<IUsersService, UsersService>();
-        builder.Services.AddScoped<IProductsService, ProductsService>();
-        builder.Services.AddScoped<IPostsService, PostsService>();
+        builder.Services.AddScoped<IUsersService, Services.HTTP.UsersService>();
+        builder.Services.AddScoped<IProductsService, Services.HTTP.ProductsService>();
+        builder.Services.AddScoped<IPostsService, Services.HTTP.PostsService>();
 
         builder.Services.AddSingleton<IMonitoringService, MonitoringService>();
         builder.Services.AddScoped(typeof(CounterService));

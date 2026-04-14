@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.Text.Json;
 using WebApplication1.Models;
 
 namespace WebApplication1.Clients;
@@ -16,8 +17,17 @@ public class ProductsClient(HttpClient httpClient) : HttpClient
         return await this.httpClient.GetFromJsonAsync<Product>(id.ToString());
     }
 
-    //public async Task<int> Add(Product product)
-    //{
-    //    //return await this.httpClient.PostAsJsonAsync<Product>(string.Empty, product); Requests doesnt work, so i cant handle this response.
-    //}
+    public async Task<int> Add(Product product)
+    {
+        var response = await this.httpClient.PostAsJsonAsync(string.Empty, product);
+        string respContent = await response.Content.ReadAsStringAsync();
+
+        Product respProduct = JsonSerializer.Deserialize<Product>(respContent, new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true,
+            NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
+        });
+
+        return respProduct.Id;
+    }
 }

@@ -19,6 +19,6 @@ public class ProductsService(ProductsClient productsClient) : IProductsService
 
     public int Add(Product product)
     {
-        return 5;//productsClient.Add(product).Result;
+        return productsClient.Add(product).Result;
     }
 }

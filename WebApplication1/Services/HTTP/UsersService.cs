@@ -22,14 +22,7 @@ public class UsersService(UsersClient usersClient) : IUsersService
         return this.usersClient.Put(id, user).Result;
     }
 
-    private void Map(User sourceUser, User targetUser)
-    {
-        targetUser.Name = sourceUser.Name;
-        targetUser.Email = sourceUser.Email;
-        targetUser.Username = sourceUser.Username;
-    }
-
-    public string CheckAutorization(IHeaderDictionary headers)
+    public string CheckAutorization(IHeaderDictionary headers)//TODO: Ճիշտ ձևը իմանալուց հետո կկորի սա ։)
     {
         throw new NotImplementedException();
     }

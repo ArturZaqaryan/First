@@ -34,6 +34,6 @@ public class UsersClient(HttpClient httpClient) : HttpClient
             PropertyNameCaseInsensitive = true,
             NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
         });
-        return 1;
+        return respUser.Id;
     }
 }

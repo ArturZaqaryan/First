@@ -1,6 +1,10 @@
-﻿using WebApplication1.Clients;
+﻿using FluentValidation.AspNetCore;
+using FluentValidation;
+using WebApplication1.Clients;
 using WebApplication1.Services.Abstract;
 using WebApplication1.Services.Simple;
+using WebApplication1.Validators;
+using WebApplication1.Repositories;
 
 namespace WebApplication1;
 
@@ -34,9 +38,16 @@ public class Program
         builder.Services.AddSingleton<IMonitoringService, MonitoringService>();
         builder.Services.AddScoped(typeof(CounterService));
 
+        builder.Services.AddSingleton<UserRepository>();
+
         builder.Services.AddScoped<IPaymentsService, ArCaPaymentsService>();
 
         builder.Services.AddControllers();
+
+        builder.Services.AddValidatorsFromAssemblyContaining<UserValidator>();
+
+        builder.Services.AddFluentValidationAutoValidation();
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();

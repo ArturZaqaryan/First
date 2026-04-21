@@ -13,7 +13,7 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public void Post([FromBody] UserRegister user, [FromServices] UserRepository userRepository)
         {
-            userRepository.AddUser(user);
+            userRepository.Add(user);
         }
     }
 }

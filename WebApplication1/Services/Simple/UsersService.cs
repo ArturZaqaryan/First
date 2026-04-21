@@ -1,34 +1,12 @@
 ﻿using WebApplication1.Models;
+using WebApplication1.Repositories;
 using WebApplication1.Services.Abstract;
 
 namespace WebApplication1.Services.Simple;
 
-public class UsersService : IUsersService
+public class UsersService(UserRepository userRepository) : IUsersService
 {
-    private readonly List<User> users =
-            [
-                new User()
-                {
-                    Id = 1,
-                    Name = "Test",
-                    Username = "Test",
-                    Email = "Test"
-                },
-                new User()
-                {
-                    Id = 2,
-                    Name = "Test 2",
-                    Username = "Test 2",
-                    Email = "Test 2"
-                },
-                new User()
-                {
-                    Id = 3,
-                    Name = "Test 3",
-                    Username = "Test 3",
-                    Email = "Test 3"
-                },
-            ];
+    private readonly UserRepository userRepository = userRepository;
 
     public string CheckAutorization(IHeaderDictionary headers)
     {
@@ -43,20 +21,20 @@ public class UsersService : IUsersService
 
     public User Get(int id)
     {
-        return users.FirstOrDefault(u => u.Id == id);
+        return userRepository.GetById(id);
     }
 
     public int Add(User user)
     {
         user.Id = Random.Shared.Next(1, 1000);
-        users.Add(user);
+        userRepository.Add(user);
 
         return user.Id;
     }
 
     public int EditOrAdd(int id, User user)
     {
-        var findUser = users.FirstOrDefault(u => u.Id == id);
+        var findUser = userRepository.Get().FirstOrDefault(u => u.Id == id);
 
         if (findUser == null)
         {
@@ -64,6 +42,7 @@ public class UsersService : IUsersService
         }
 
         Map(user, findUser);
+
         return -1;
     }
 

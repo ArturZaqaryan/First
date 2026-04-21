@@ -8,8 +8,9 @@ namespace WebApplication1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AdvancedUserController : ControllerBase
+    public class AdvancedUserController(UserRepository userRepository) : ControllerBase
     {
+        private readonly UserRepository userRepository = userRepository;
         [HttpPost]
         public void Post([FromBody] UserRegister user, [FromServices] UserRepository userRepository)
         {

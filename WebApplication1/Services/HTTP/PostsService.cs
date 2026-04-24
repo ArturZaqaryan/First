@@ -17,8 +17,8 @@ public class PostsService(PostsClient postsClient) : IPostsService
         return await this.postsClient.GetById(id);
     }
 
-    public void Delete(int id)
+    public async Task Delete(int id)
     {
-        this.postsClient.Delete(id);
+        await this.postsClient.Delete(id);
     }
 }

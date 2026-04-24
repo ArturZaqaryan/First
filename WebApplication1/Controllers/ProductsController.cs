@@ -21,13 +21,13 @@ namespace WebApplication1.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetAsync(int id)
         {
-            var result = this.productsService.GetByIdAsync(id);
+            var result = await this.productsService.GetByIdAsync(id);
             if (result == null)
             {
                 return NotFound();
             }
 
-            return await result;
+            return result;
         }
 
         [HttpPost]

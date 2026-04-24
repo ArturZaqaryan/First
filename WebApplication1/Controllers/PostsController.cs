@@ -31,9 +31,9 @@ namespace WebApplication1.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
-            this.postsService.Delete(id);
+            await this.postsService.Delete(id);
             return NoContent();
         }
     }

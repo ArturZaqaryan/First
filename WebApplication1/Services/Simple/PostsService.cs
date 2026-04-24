@@ -47,8 +47,9 @@ public class PostsService : IPostsService
         return Task.FromResult(posts.FirstOrDefault(u => u.Id == id));
     }
 
-    public void Delete(int id)
+    public Task Delete(int id)
     {
         posts.Remove(posts.FirstOrDefault(u => u.Id == id));
+        return Task.CompletedTask;
     }
 }

@@ -25,9 +25,9 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] User user)
+        public async Task<IActionResult> PostAsync([FromBody] User user)
         {
-            var result = new { id = this.usersService.AddAsync(user)};
+            var result = new { id = await this.usersService.AddAsync(user)};
             return CreatedAtAction(nameof(GetAsync), result, result);
         }
 

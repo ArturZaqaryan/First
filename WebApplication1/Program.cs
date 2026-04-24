@@ -12,17 +12,17 @@ public class Program
 
         builder.Services.AddHttpClient<PostsClient>(client =>
         {
-            client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/posts/");
+            client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
         });
 
         builder.Services.AddHttpClient<ProductsClient>(client =>
         {
-            client.BaseAddress = new Uri("https://fakestoreapi.com/products/");
+            client.BaseAddress = new Uri("https://fakestoreapi.com/");
         });
 
         builder.Services.AddHttpClient<UsersClient>(client =>
         {
-            client.BaseAddress = new Uri("https://reqres.in/api/users/");
+            client.BaseAddress = new Uri("https://reqres.in/api/");
             client.DefaultRequestHeaders.Add("x-api-key", "reqres_902cbf1ee1eb4a4db6ed8ef5f4abde48");
         });
 

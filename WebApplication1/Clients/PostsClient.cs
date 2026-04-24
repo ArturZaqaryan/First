@@ -7,19 +7,19 @@ public class PostsClient(HttpClient httpClient) : HttpClient
     private readonly HttpClient httpClient = httpClient;
     public async Task<IEnumerable<Post>> GetByUserAndTitle(int userId, string title = "")
     {
-        string queryString = $"?userId={userId}";
+        string queryString = $"posts?userId={userId}";
         queryString += string.IsNullOrWhiteSpace(title) ? string.Empty : $"&title={title}";
 
-        return await this.httpClient.GetFromJsonAsync<IEnumerable<Post>>(queryString);
+        return await this.httpClient.GetFromJsonAsync<IEnumerable<Post>>(queryString) ?? [];
     }
 
     public async Task<Post> GetById(int id)
     {
-        return await this.httpClient.GetFromJsonAsync<Post>(id.ToString());
+        return await this.httpClient.GetFromJsonAsync<Post>($"posts/{id}");
     }
 
     public void Delete(int id)
     {
-        this.httpClient.DeleteAsync(id.ToString());
+        var _ = this.httpClient.DeleteAsync($"posts/{id}").Result;
     }
 }

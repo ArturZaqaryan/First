@@ -9,17 +9,19 @@ public class ProductsClient(HttpClient httpClient) : HttpClient
     private readonly HttpClient httpClient = httpClient;
     public async Task<IEnumerable<Product>> GetByCategory(string category)
     {
-        return await this.httpClient.GetFromJsonAsync<IEnumerable<Product>>($"category/{category}");
+        return await this.httpClient.GetFromJsonAsync<IEnumerable<Product>>($"products/category/{category}");
     }
 
     public async Task<Product> GetById(int id)
     {
-        return await this.httpClient.GetFromJsonAsync<Product>(id.ToString());
+        return await this.httpClient.GetFromJsonAsync<Product>($"products/{id}");
     }
 
     public async Task<int> Add(Product product)
     {
-        var response = await this.httpClient.PostAsJsonAsync(string.Empty, product);
+        var response = await this.httpClient.PostAsJsonAsync("products/", product);
+
+        response.EnsureSuccessStatusCode();
         string respContent = await response.Content.ReadAsStringAsync();
 
         Product respProduct = JsonSerializer.Deserialize<Product>(respContent, new JsonSerializerOptions()
@@ -28,6 +30,6 @@ public class ProductsClient(HttpClient httpClient) : HttpClient
             NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
         });
 
-        return respProduct.Id;
+        return respProduct == null ? throw new Exception("Internal Server error.") : respProduct.Id;
     }
 }

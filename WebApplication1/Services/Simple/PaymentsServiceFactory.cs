@@ -11,8 +11,8 @@ public class PaymentsServiceFactory(IServiceProvider serviceProvider) : IPayment
     {
         return paymentMethod switch
         {
-            PaymentMethod.ArCaPay => serviceProvider.GetRequiredService<ArCaPaymentsService>(),
-            PaymentMethod.VisaPay => serviceProvider.GetRequiredService<VisaPaymentsService>(),
+            PaymentMethod.ArCaPayment => serviceProvider.GetRequiredService<ArCaPaymentsService>(),
+            PaymentMethod.VisaPayment => serviceProvider.GetRequiredService<VisaPaymentsService>(),
             _ => throw new ArgumentException("Specified payment method not found!!!"),
         };
     }

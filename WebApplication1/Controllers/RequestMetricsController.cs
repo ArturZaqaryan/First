@@ -7,7 +7,7 @@ namespace WebApplication1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MetricsController(IMonitoringService monitoringService, CounterService counterService) : ControllerBase
+    public class RequestMetricsController(IMonitoringService monitoringService, CounterService counterService) : ControllerBase
     {
         private readonly IMonitoringService monitoringService = monitoringService;
         private readonly CounterService counterService = counterService;

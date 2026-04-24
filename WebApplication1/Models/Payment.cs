@@ -11,6 +11,6 @@ public class Payment
 
 public enum PaymentMethod
 {
-    ArCaPay,
-    VisaPay
+    ArCaPayment,
+    VisaPayment
 }

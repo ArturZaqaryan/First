@@ -8,11 +8,11 @@ public class UserRegister : User
 
     public DateTime DateOfBirth { get; set; }
 
-    [Range(0, int.MaxValue)]
+    [Range(1, int.MaxValue)]
     public int Quantity { get; set; }
 
     public decimal Price { get; set; }
 
-    [Range(0, 50)]
+    [Range(1, 49)]
     public int Amount { get; set; }
 }

@@ -19,7 +19,6 @@ public class Program
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(builder.Configuration)
             .Enrich.FromLogContext()
-            .WriteTo.Seq("http://localhost:5341")
             .CreateLogger();
 
         builder.Host.UseSerilog();

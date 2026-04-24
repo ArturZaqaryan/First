@@ -27,7 +27,7 @@ jobs:
             }'
 
   # ─────────────────────────────────────────────────────────
-  # Triggered when student comments on the PR
+  # Triggered when a student comments on the PR
   # ─────────────────────────────────────────────────────────
   handle-comment:
     if: github.event_name == 'issue_comment' && github.event.issue.pull_request != null
@@ -50,7 +50,7 @@ jobs:
       - name: Parse command
         id: cmd
         if: steps.auth.outputs.authorized == 'true'
-                run: |
+        run: |
           # Write comment body to file to avoid shell interpretation issues
           cat << 'COMMENT_EOF' > comment_body.txt
           ${{ github.event.comment.body }}

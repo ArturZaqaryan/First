@@ -4,7 +4,7 @@ using WebApplication1.Models;
 
 namespace WebApplication1.Clients;
 
-public class ProductsClient(HttpClient httpClient) : HttpClient
+public class ProductsClient(HttpClient httpClient)
 {
     private readonly HttpClient httpClient = httpClient;
     public async Task<IEnumerable<Product>> GetByCategory(string category)

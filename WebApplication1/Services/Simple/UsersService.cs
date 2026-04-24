@@ -38,7 +38,7 @@ public class UsersService : IUsersService
             return Task.FromResult("invalid_api_key");
         }
 
-        return null;
+        return Task.FromResult<string>(null);
     }
 
     public Task<User> GetAsync(int id)

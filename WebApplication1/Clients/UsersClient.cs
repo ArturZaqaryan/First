@@ -3,7 +3,7 @@ using WebApplication1.Models;
 
 namespace WebApplication1.Clients;
 
-public class UsersClient(HttpClient httpClient) : HttpClient
+public class UsersClient(HttpClient httpClient)
 {
     private readonly HttpClient httpClient = httpClient;
     public async Task<User> Get(int id)

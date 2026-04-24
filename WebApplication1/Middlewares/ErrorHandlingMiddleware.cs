@@ -22,7 +22,7 @@ public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandling
             context.Response.ContentType = "application/json";
             var response = new
             {
-                message = "Duplicate entry",
+                message = "User you trying to register is also registered.",
                 detail = ex.Message
             };
             var json = JsonSerializer.Serialize(response);

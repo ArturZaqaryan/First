@@ -17,7 +17,9 @@ public class Program
         builder.Services.AddSingleton<IMonitoringService, MonitoringService>();
         builder.Services.AddScoped(typeof(CounterService));
 
-        builder.Services.AddScoped<IPaymentsService, ArCaPaymentsService>();
+        builder.Services.AddScoped<ArCaPaymentsService>();
+        builder.Services.AddScoped<VisaPaymentsService>();
+        builder.Services.AddScoped<IPaymentsServiceFactory, PaymentsServiceFactory>();
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -6,5 +6,11 @@ public class Payment
     public decimal Amount {  get; set; }
     public string Name { get; set; }
     public string Status { get; set; }
+    public PaymentMethod PaymentMethod { get; set; }
+}
 
+public enum PaymentMethod
+{
+    ArCaPay,
+    VisaPay
 }

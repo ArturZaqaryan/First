@@ -7,18 +7,19 @@ namespace WebApplication1.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PaymentsController(IPaymentsService paymentsService, CounterService counterService) : ControllerBase
+    public class PaymentsController(IPaymentsServiceFactory paymentsServiceFactory, CounterService counterService) : ControllerBase
     {
-        private readonly IPaymentsService paymentsService = paymentsService;
+        private readonly IPaymentsServiceFactory paymentsServiceFactory = paymentsServiceFactory;
         private readonly CounterService counterService = counterService;
 
 
         [HttpPost]
         public string Post([FromBody] Payment payment)
         {
-            this.paymentsService.Pay(payment);
+            var service = this.paymentsServiceFactory.GetService(payment.PaymentMethod);
+            service.Pay(payment);
 
-            return this.paymentsService.ToString();
+            return service.MethodName;
         }
     }
 }

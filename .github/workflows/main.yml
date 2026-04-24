@@ -50,16 +50,19 @@ jobs:
       - name: Parse command
         id: cmd
         if: steps.auth.outputs.authorized == 'true'
-        run: |
-          COMMENT="${{ github.event.comment.body }}"
+                run: |
+          # Write comment body to file to avoid shell interpretation issues
+          cat << 'COMMENT_EOF' > comment_body.txt
+          ${{ github.event.comment.body }}
+          COMMENT_EOF
 
           echo "hw_found=false" >> $GITHUB_OUTPUT
           echo "summon_found=false" >> $GITHUB_OUTPUT
           echo "hw_number=" >> $GITHUB_OUTPUT
 
-          echo "DEBUG comment body: $COMMENT"
+          # Check /hw N
 
-          HW=$(echo "$COMMENT" | grep -oiP '^/hw\s*\K\d+' || true)
+          HW=$(grep -oiP '^/hw\s*\K\d+' comment_body.txt || true)
           echo "DEBUG hw match result: '$HW'"
 
           if [ -n "$HW" ]; then
@@ -69,9 +72,10 @@ jobs:
             exit 0
           fi
 
-          SUMMON=$(echo "$COMMENT" | grep -oiP '^/summon[\s_-]*goblin' || true)
+          # Check /summon-goblin
+          SUMMON=$(grep -oiP '^/summon[\s_-]*goblin' comment_body.txt || true)
           echo "DEBUG summon match result: '$SUMMON'"
-
+          
           if [ -n "$SUMMON" ]; then
             echo "summon_found=true" >> $GITHUB_OUTPUT
             echo "DEBUG matched /summon-goblin command"

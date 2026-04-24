@@ -37,14 +37,14 @@ public class PostsService : IPostsService
                 }
             ];
 
-    public IEnumerable<Post> GetByUserAndTitle(int userId, string title = "")
+    public Task<IEnumerable<Post>> GetByUserAndTitleAsync(int userId, string title = "")
     {
-        return posts.Where(u => u.UserId == userId && (string.IsNullOrWhiteSpace(title) || u.Title == title));
+        return Task.FromResult(posts.Where(u => u.UserId == userId && (string.IsNullOrWhiteSpace(title) || u.Title == title)));
     }
 
-    public Post GetById(int id)
+    public Task<Post> GetByIdAsync(int id)
     {
-        return posts.FirstOrDefault(u => u.Id == id);
+        return Task.FromResult(posts.FirstOrDefault(u => u.Id == id));
     }
 
     public void Delete(int id)

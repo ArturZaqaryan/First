@@ -7,22 +7,22 @@ namespace WebApplication1.Services.HTTP;
 public class UsersService(UsersClient usersClient) : IUsersService
 {
     private readonly UsersClient usersClient = usersClient;
-    public User Get(int id)
+    public async Task<User> GetAsync(int id)
     {
-        return this.usersClient.Get(id).Result;
+        return await this.usersClient.Get(id);
     }
 
-    public int Add(User user)
+    public async Task<int> AddAsync(User user)
     {
-        return this.usersClient.Add(user).Result;
+        return await usersClient.Add(user);
     }
 
-    public int EditOrAdd(int id, User user)
+    public async Task<int> EditOrAddAsync(int id, User user)
     {
-        return this.usersClient.Put(id, user).Result;
+        return await this.usersClient.Put(id, user);
     }
 
-    public string CheckAutorization(IHeaderDictionary headers)//TODO: Ճիշտ ձևը իմանալուց հետո կկորի սա ։)
+    public Task<string> CheckAutorization(IHeaderDictionary headers)//TODO: Ճիշտ ձևը իմանալուց հետո կկորի սա ։)
     {
         throw new NotImplementedException();
     }

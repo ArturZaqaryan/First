@@ -18,8 +18,8 @@ public class PostsClient(HttpClient httpClient) : HttpClient
         return await this.httpClient.GetFromJsonAsync<Post>($"posts/{id}");
     }
 
-    public void Delete(int id)
+    public async void Delete(int id)
     {
-        var _ = this.httpClient.DeleteAsync($"posts/{id}").Result;
+        var _ = await this.httpClient.DeleteAsync($"posts/{id}");
     }
 }

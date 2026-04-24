@@ -7,14 +7,14 @@ namespace WebApplication1.Services.HTTP;
 public class PostsService(PostsClient postsClient) : IPostsService
 {
     private readonly PostsClient postsClient = postsClient;
-    public IEnumerable<Post> GetByUserAndTitle(int userId, string title = "")
+    public async Task<IEnumerable<Post>> GetByUserAndTitleAsync(int userId, string title = "")
     {
-        return this.postsClient.GetByUserAndTitle(userId,title).Result;
+        return await this.postsClient.GetByUserAndTitle(userId,title);
     }
 
-    public Post GetById(int id)
+    public async Task<Post> GetByIdAsync(int id)
     {
-        return this.postsClient.GetById(id).Result;
+        return await this.postsClient.GetById(id);
     }
 
     public void Delete(int id)

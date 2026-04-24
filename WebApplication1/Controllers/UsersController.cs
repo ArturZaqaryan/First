@@ -13,28 +13,28 @@ namespace WebApplication1.Controllers
         private readonly CounterService counterService = counterService;
 
         [HttpGet("{id}")]
-        public ActionResult<User> Get(int id)
+        public async Task<ActionResult<User>> GetAsync(int id)
         {
-            var result = usersService.Get(id);
+            var result = usersService.GetAsync(id);
             if (result == null)
             {
                 return NotFound();
             }
 
-            return result;
+            return await result;
         }
 
         [HttpPost]
         public IActionResult Post([FromBody] User user)
         {
-            var result = new { id = this.usersService.Add(user)};
-            return CreatedAtAction(nameof(Get), result, result);
+            var result = new { id = this.usersService.AddAsync(user)};
+            return CreatedAtAction(nameof(GetAsync), result, result);
         }
 
         [HttpPut("{id}")]
         public ActionResult Put(int id, [FromBody] User user)
         {
-            this.usersService.EditOrAdd(id, user);
+            this.usersService.EditOrAddAsync(id, user);
             return NoContent();
         }
     }

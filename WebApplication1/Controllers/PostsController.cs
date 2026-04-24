@@ -13,21 +13,21 @@ namespace WebApplication1.Controllers
         private readonly CounterService durationCounterService = CounterService;
 
         [HttpGet]
-        public IEnumerable<Post> Get(int userId = 1, string title = "")
+        public async Task<IEnumerable<Post>> GetAsync(int userId = 1, string title = "")
         {
-            return this.postsService.GetByUserAndTitle(userId, title);
+            return await postsService.GetByUserAndTitleAsync(userId, title);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Post> Get(int id)
+        public async Task<ActionResult<Post>> GetAsync(int id)
         {
-            var result = this.postsService.GetById(id);
+            var result = this.postsService.GetByIdAsync(id);
             if (result == null)
             {
                 return NotFound();
             }
 
-            return result;
+            return await result;
         }
 
         [HttpDelete("{id}")]

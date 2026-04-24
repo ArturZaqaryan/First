@@ -4,8 +4,8 @@ namespace WebApplication1.Services.Abstract;
 
 public interface IUsersService
 {
-    string CheckAutorization(IHeaderDictionary headers);
-    User Get(int id);
-    int Add(User user);
-    int EditOrAdd(int id, User user);
+    Task<string> CheckAutorization(IHeaderDictionary headers);
+    Task<User> GetAsync(int id);
+    Task<int> AddAsync(User user);
+    Task<int> EditOrAddAsync(int id, User user);
 }

@@ -4,8 +4,8 @@ namespace WebApplication1.Services.Abstract;
 
 public interface IProductsService
 {
-    int Add(Product product);
-    Product GetById(int id);
-    IEnumerable<Product> GetByCategory(string category);
+    Task<int> AddAsync(Product product);
+    Task<Product> GetByIdAsync(int id);
+    Task<IEnumerable<Product>> GetByCategoryAsync(string category);
 
 }

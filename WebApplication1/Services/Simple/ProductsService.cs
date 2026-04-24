@@ -93,21 +93,21 @@ public class ProductsService : IProductsService
                 }
             ];
 
-    public IEnumerable<Product> GetByCategory(string category)
+    public Task<IEnumerable<Product>> GetByCategoryAsync(string category)
     {
-        return products.Where(p => p.Category == category);
+        return Task.FromResult(products.Where(p => p.Category == category));
     }
 
-    public Product GetById(int id)
+    public Task<Product> GetByIdAsync(int id)
     {
-        return products.FirstOrDefault(p => p.Id == id);
+        return Task.FromResult(products.FirstOrDefault(p => p.Id == id));
     }
 
-    public int Add(Product product)
+    public Task<int> AddAsync(Product product)
     {
         product.Id = Random.Shared.Next(1000);
         products.Add(product);
 
-        return product.Id;
+        return Task.FromResult(product.Id);
     }
 }

@@ -30,41 +30,41 @@ public class UsersService : IUsersService
                 },
             ];
 
-    public string CheckAutorization(IHeaderDictionary headers)
+    public Task<string> CheckAutorization(IHeaderDictionary headers)
     {
         if (!headers.TryGetValue("x-api-key", out var apiKey) ||
                 apiKey != "reqres_902cbf1ee1eb4a4db6ed8ef5f4abde48")
         {
-            return "invalid_api_key";
+            return Task.FromResult("invalid_api_key");
         }
 
         return null;
     }
 
-    public User Get(int id)
+    public Task<User> GetAsync(int id)
     {
-        return users.FirstOrDefault(u => u.Id == id);
+        return Task.FromResult(users.FirstOrDefault(u => u.Id == id));
     }
 
-    public int Add(User user)
+    public Task<int> AddAsync(User user)
     {
         user.Id = Random.Shared.Next(1, 1000);
         users.Add(user);
 
-        return user.Id;
+        return Task.FromResult(user.Id);
     }
 
-    public int EditOrAdd(int id, User user)
+    public Task<int> EditOrAddAsync(int id, User user)
     {
         var findUser = users.FirstOrDefault(u => u.Id == id);
 
         if (findUser == null)
         {
-            return Add(user);
+            return AddAsync(user);
         }
 
         Map(user, findUser);
-        return -1;
+        return Task.FromResult(-1);
     }
 
     private void Map(User sourceUser, User targetUser)

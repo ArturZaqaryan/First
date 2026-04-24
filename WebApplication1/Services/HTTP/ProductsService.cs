@@ -7,18 +7,18 @@ namespace WebApplication1.Services.HTTP;
 public class ProductsService(ProductsClient productsClient) : IProductsService
 {
     private readonly ProductsClient productsClient = productsClient;
-    public IEnumerable<Product> GetByCategory(string category)
+    public async Task<IEnumerable<Product>> GetByCategoryAsync(string category)
     {
-        return productsClient.GetByCategory(category).Result;
+        return await productsClient.GetByCategory(category);
     }
 
-    public Product GetById(int id)
+    public async Task<Product> GetByIdAsync(int id)
     {
-        return productsClient.GetById(id).Result;
+        return await productsClient.GetById(id);
     }
 
-    public int Add(Product product)
+    public async Task<int> AddAsync(Product product)
     {
-        return productsClient.Add(product).Result;
+        return await productsClient.Add(product);
     }
 }

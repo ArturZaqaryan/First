@@ -3,7 +3,7 @@ using WebApplication1.Models;
 
 namespace WebApplication1.Validators
 {
-    public class UserValidator : AbstractValidator<UserRegister>
+    public class UserValidator : AbstractValidator<AdvancedUser>
     {
         public UserValidator()
         {

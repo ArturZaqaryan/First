@@ -2,7 +2,7 @@
 
 namespace WebApplication1.Models;
 
-public class UserRegister : User
+public class AdvancedUser : User
 {
     public string Password { get; set; }
 

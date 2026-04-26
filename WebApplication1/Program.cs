@@ -5,7 +5,6 @@ using WebApplication1.Clients;
 using WebApplication1.Middlewares;
 using WebApplication1.Repositories;
 using WebApplication1.Services.Abstract;
-using WebApplication1.Services.Simple;
 using WebApplication1.Validators;
 
 namespace WebApplication1;
@@ -44,14 +43,14 @@ public class Program
         builder.Services.AddScoped<IProductsService, Services.HTTP.ProductsService>();
         builder.Services.AddScoped<IPostsService, Services.HTTP.PostsService>();
 
-        builder.Services.AddSingleton<IMonitoringService, MonitoringService>();
-        builder.Services.AddScoped(typeof(CounterService));
+        builder.Services.AddSingleton<IMonitoringService, Services.Simple.MonitoringService>();
+        builder.Services.AddScoped(typeof(Services.Simple.CounterService));
 
-        builder.Services.AddSingleton<UserRepository>();
+        builder.Services.AddSingleton<Repositories.Abstract.IUserRepository, UserRepository>();
 
-        builder.Services.AddScoped<IPaymentsService, ArCaPaymentsService>();
+        builder.Services.AddScoped<IPaymentsService, Services.Simple.ArCaPaymentsService>();
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddNewtonsoftJson();
 
         builder.Services.AddValidatorsFromAssemblyContaining<UserValidator>();
 

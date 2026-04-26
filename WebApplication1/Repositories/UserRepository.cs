@@ -1,9 +1,10 @@
 ﻿using WebApplication1.Exceptions;
 using WebApplication1.Models;
+using WebApplication1.Repositories.Abstract;
 
 namespace WebApplication1.Repositories;
 
-public class UserRepository
+public class UserRepository : IUserRepository
 {
     private readonly List<User> users = [];
 
@@ -29,8 +30,8 @@ public class UserRepository
         return users;
     }
 
-    public User GetById(int id) 
+    public User GetById(int id)
     {
-        return users[id];
+        return users.FirstOrDefault(u => u.Id == id);
     }
 }

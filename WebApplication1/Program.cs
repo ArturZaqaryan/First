@@ -1,4 +1,5 @@
-﻿using WebApplication1.Services;
+﻿using WebApplication1.Services.Abstract;
+using WebApplication1.Services.Simple;
 
 namespace WebApplication1;
 
@@ -9,7 +10,16 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddScoped(typeof(UsersService));
+        builder.Services.AddScoped<IUsersService, UsersService>();
+        builder.Services.AddScoped<IProductsService, ProductsService>();
+        builder.Services.AddScoped<IPostsService, PostsService>();
+
+        builder.Services.AddSingleton<IMonitoringService, MonitoringService>();
+        builder.Services.AddScoped(typeof(CounterService));
+
+        builder.Services.AddScoped<ArCaPaymentsService>();
+        builder.Services.AddScoped<VisaPaymentsService>();
+        builder.Services.AddScoped<IPaymentsServiceFactory, PaymentsServiceFactory>();
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
